@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE packagegui SYSTEM "../schema/packages.dtd">
+<?xml-stylesheet type="text/xsl" href="../xsl/package.xsl"?>
+<packagegui>
+    <copyright>
+        <![CDATA[
+/*
+ * netbird.xml
+ *
+ * part of pfSense (https://www.pfsense.org)
+ * Copyright (c) 2022-2025 Rubicon Communications, LLC (Netgate)
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+	]]>
+    </copyright>
+    <name>netbird</name>
+    <version>%%PKGVERSION%%</version>
+    <title>VPN/NetBird</title>
+    <aftersaveredirect>/settings.php</aftersaveredirect>
+    <menu>
+        <name>NetBird</name>
+        <section>VPN</section>
+        <configfile>netbird.xml</configfile>
+        <url>/settings.php</url>
+    </menu>
+    <menu>
+        <name>NetBird</name>
+        <section>Status</section>
+        <configfile>netbird.xml</configfile>
+        <url>/netbird_status.php</url>
+    </menu>
+    <tabs>
+        <tab>
+            <text>Authentication</text>
+            <url>auth.php</url>
+        </tab>
+        <tab>
+            <text>Settings</text>
+            <url>settings.php</url>
+            <active/>
+        </tab>
+        <tab>
+            <text>Status</text>
+            <url>netbird_status.php</url>
+        </tab>
+    </tabs>
+    <fields>
+        <field>
+            <name>Settings</name>
+            <type>listtopic</type>
+        </field>
+
+        <field>
+            <fielddescr>Interface Port</fielddescr>
+            <fieldname>interfaceport</fieldname>
+            <description>
+                <![CDATA[
+				UDP port to listen on for WireGuard traffic.
+				]]>
+            </description>
+            <type>input</type>
+            <default_value>51820</default_value>
+            <required/>
+        </field>
+
+        <field>
+            <fielddescr>Connect on Startup</fielddescr>
+            <fieldname>startupconnect</fieldname>
+            <description>
+                <![CDATA[
+				Enable
+				]]>
+            </description>
+            <sethelp>
+                <![CDATA[
+				With 'Connect on Startup' enabled (default), .....
+				]]>
+            </sethelp>
+            <type>checkbox</type>
+            <default_value>on</default_value>
+        </field>
+
+
+    </fields>
+    <note>
+        <![CDATA[
+		Changes to these settings may temporarily disrupt connections and access to NetBird.
+		]]>
+    </note>
+</packagegui>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE packagegui SYSTEM "../schema/packages.dtd">
+<?xml-stylesheet type="text/xsl" href="../xsl/package.xsl"?>
+<packagegui>
+    <copyright>
+        <![CDATA[
+        /*
+        * netbird_auth.xml
+        *
+        * part of pfSense (https://www.pfsense.org)
+        * Copyright (c) 2022-2025 Rubicon Communications, LLC (Netgate)
+        * All rights reserved.
+        *
+        * Licensed under the Apache License, Version 2.0 (the "License");
+        * you may not use this file except in compliance with the License.
+        * You may obtain a copy of the License at
+        *
+        * http://www.apache.org/licenses/LICENSE-2.0
+        *
+        * Unless required by applicable law or agreed to in writing, software
+        * distributed under the License is distributed on an "AS IS" BASIS,
+        * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+        * See the License for the specific language governing permissions and
+        * limitations under the License.
+        */
+        ]]>
+    </copyright>
+    <name>netbird_auth</name>
+    <version>%%PKGVERSION%%</version>
+    <title>VPN/NetBird</title>
+    <include_file>/usr/local/pkg/netbird/netbird_auth.inc</include_file>
+    <aftersaveredirect>/auth.php</aftersaveredirect>
+    <tabs>
+        <tab>
+            <text>Authentication</text>
+            <url>auth.php</url>
+            <active/>
+        </tab>
+        <tab>
+            <text>Settings</text>
+            <url>settings.php</url>
+        </tab>
+        <tab>
+            <text>Status</text>
+            <url>netbird_status.php</url>
+        </tab>
+    </tabs>
+    <fields>
+        <field>
+            <name>Authentication</name>
+            <type>listtopic</type>
+        </field>
+        <field>
+            <fielddescr>Management Server</fielddescr>
+            <fieldname>managementurl</fieldname>
+            <description>
+                <![CDATA[
+                Base URL of management server.
+                ]]>
+            </description>
+            <type>input</type>
+            <default_value>https://api.netbird.io:443</default_value>
+            <required/>
+        </field>
+        <field>
+            <fielddescr>Setup Key</fielddescr>
+            <fieldname>setupkey</fieldname>
+            <description>
+                <![CDATA[
+                Set the setup key for authentication.
+                ]]>
+            </description>
+            <type>input</type>
+            <required/>
+        </field>
+        <field>
+            <name>Disconnect</name>
+            <type>listtopic</type>
+        </field>
+        <field>
+            <fielddescr>Disconnect</fielddescr>
+            <fieldname>service_clean</fieldname>
+            <type>button</type>
+            <buttonicon>fa-solid fa-right-from-bracket</buttonicon>
+            <buttonclass>btn-danger</buttonclass>
+            <description>
+                <![CDATA[
+                Disconnect local machine from management server (if connected).
+                ]]>
+            </description>
+            <placeonbottom/>
+        </field>
+    </fields>
+</packagegui>
