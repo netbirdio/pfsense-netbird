@@ -40,9 +40,6 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/*.php \
 		${STAGEDIR}${PREFIX}/www
 
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/shortcuts/*.inc \
-		${STAGEDIR}${PREFIX}/www/shortcuts
-
 	@${REINPLACE_CMD} -i '' -e "s|%%PKGVERSION%%|${PKGVERSION}|" \
 		${STAGEDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${PREFIX}/pkg/netbird.xml \
