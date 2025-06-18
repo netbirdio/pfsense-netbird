@@ -28,12 +28,12 @@
     <name>netbird</name>
     <version>%%PKGVERSION%%</version>
     <title>VPN/NetBird</title>
-    <aftersaveredirect>/settings.php</aftersaveredirect>
+    <aftersaveredirect>/pkg_edit.php?xml=netbird.xml</aftersaveredirect>
     <menu>
         <name>NetBird</name>
         <section>VPN</section>
         <configfile>netbird.xml</configfile>
-        <url>/settings.php</url>
+        <url>/pkg_edit.php?xml=netbird.xml</url>
     </menu>
     <menu>
         <name>NetBird</name>
@@ -44,11 +44,11 @@
     <tabs>
         <tab>
             <text>Authentication</text>
-            <url>auth.php</url>
+            <url>pkg_edit.php?xml=netbird/netbird_auth.xml</url>
         </tab>
         <tab>
             <text>Settings</text>
-            <url>settings.php</url>
+            <url>pkg_edit.php?xml=netbird.xml</url>
             <active/>
         </tab>
         <tab>

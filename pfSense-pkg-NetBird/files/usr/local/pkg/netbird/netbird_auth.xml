@@ -29,16 +29,16 @@
     <version>%%PKGVERSION%%</version>
     <title>VPN/NetBird</title>
     <include_file>/usr/local/pkg/netbird/netbird_auth.inc</include_file>
-    <aftersaveredirect>/auth.php</aftersaveredirect>
+    <aftersaveredirect>/pkg_edit.php?xml=netbird/netbird_auth.xml</aftersaveredirect>
     <tabs>
         <tab>
             <text>Authentication</text>
-            <url>auth.php</url>
+            <url>pkg_edit.php?xml=netbird/netbird_auth.xml</url>
             <active/>
         </tab>
         <tab>
             <text>Settings</text>
-            <url>settings.php</url>
+            <url>pkg_edit.php?xml=netbird.xml</url>
         </tab>
         <tab>
             <text>Status</text>
