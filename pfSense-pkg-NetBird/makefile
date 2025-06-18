@@ -24,6 +24,8 @@ do-extract:
 
 do-install:
 	${MKDIR} ${STAGEDIR}${DATADIR}
+	${MKDIR} ${STAGEDIR}${PREFIX}/pkg/netbird
+	${MKDIR} ${STAGEDIR}${PREFIX}/www
 
 	${INSTALL_DATA} ${FILESDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${DATADIR}
