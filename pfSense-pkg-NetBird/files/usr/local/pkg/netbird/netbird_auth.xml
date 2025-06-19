@@ -51,12 +51,10 @@
             <type>listtopic</type>
         </field>
         <field>
-            <fielddescr>Management Server</fielddescr>
+            <fielddescr>Management URL</fielddescr>
             <fieldname>managementurl</fieldname>
             <description>
-                <![CDATA[
-                Base URL of management server.
-                ]]>
+                <![CDATA[Base URL of management service.]]>
             </description>
             <type>input</type>
             <default_value>https://api.netbird.io:443</default_value>
@@ -66,29 +64,30 @@
             <fielddescr>Setup Key</fielddescr>
             <fieldname>setupkey</fieldname>
             <description>
-                <![CDATA[
-                Set the setup key for authentication.
-                ]]>
+                <![CDATA[Set the authentication setup key]]>
             </description>
             <type>input</type>
             <required/>
         </field>
         <field>
-            <name>Disconnect</name>
-            <type>listtopic</type>
-        </field>
-        <field>
             <fielddescr>Disconnect</fielddescr>
-            <fieldname>service_clean</fieldname>
+            <fieldname>disconnect</fieldname>
             <type>button</type>
             <buttonicon>fa-solid fa-right-from-bracket</buttonicon>
             <buttonclass>btn-danger</buttonclass>
             <description>
                 <![CDATA[
-                Disconnect local machine from management server (if connected).
-                ]]>
+				Disconnect the machine from management service (if connected)
+				]]>
             </description>
             <placeonbottom/>
         </field>
     </fields>
+
+    <custom_php_validation_command>
+        <![CDATA[netbird_auth_validate_input($_POST, $input_errors);]]>
+    </custom_php_validation_command>
+    <custom_php_resync_config_command>
+        <![CDATA[netbird_auth_resync_config();]]>
+    </custom_php_resync_config_command>
 </packagegui>
