@@ -58,17 +58,16 @@
     </tabs>
     <fields>
         <field>
-            <name>Settings</name>
+            <name>General</name>
             <type>listtopic</type>
         </field>
-
         <field>
-            <fielddescr>Interface Port</fielddescr>
+            <fielddescr>Wireguard Port</fielddescr>
             <fieldname>interfaceport</fieldname>
             <description>
                 <![CDATA[
-				UDP port to listen on for WireGuard traffic.
-				]]>
+                Wireguard interface listening port
+                ]]>
             </description>
             <type>input</type>
             <default_value>51820</default_value>
@@ -76,22 +75,172 @@
         </field>
 
         <field>
-            <fielddescr>Connect on Startup</fielddescr>
-            <fieldname>startupconnect</fieldname>
+            <name>Firewall</name>
+            <type>listtopic</type>
+        </field>
+        <field>
+            <fielddescr>Allow Configuration</fielddescr>
+            <fieldname>allowconfiguration</fieldname>
             <description>
                 <![CDATA[
-				Enable
-				]]>
+                Allow the client to manage and enforce firewall rules
+                ]]>
             </description>
             <sethelp>
                 <![CDATA[
-				With 'Connect on Startup' enabled (default), .....
-				]]>
+                If disabled the client won't modify firewall rules
+                ]]>
             </sethelp>
             <type>checkbox</type>
             <default_value>on</default_value>
         </field>
+        <field>
+            <fielddescr>Block Inbound Connection</fielddescr>
+            <fieldname>blockinboundconnection</fieldname>
+            <description>
+                <![CDATA[
+                Block all inbound connections to the local machine and any routed networks
+                ]]>
+            </description>
+            <sethelp>
+                <![CDATA[
+                This overrides any policies received from the management service
+                ]]>
+            </sethelp>
+            <type>checkbox</type>
+        </field>
 
+        <field>
+            <name>SSH</name>
+            <type>listtopic</type>
+        </field>
+        <field>
+            <fielddescr>Enable</fielddescr>
+            <fieldname>enablessh</fieldname>
+            <description>
+                <![CDATA[
+                Allows incoming SSH connections
+                ]]>
+            </description>
+            <type>checkbox</type>
+            <default_value>on</default_value>
+        </field>
+
+        <field>
+            <name>DNS</name>
+            <type>listtopic</type>
+        </field>
+        <field>
+            <fielddescr>Enable</fielddescr>
+            <fieldname>enabledns</fieldname>
+            <description>
+                <![CDATA[
+                Allows the client to configure DNS settings
+                ]]>
+            </description>
+            <type>checkbox</type>
+            <default_value>on</default_value>
+        </field>
+
+        <field>
+            <name>Routing</name>
+            <type>listtopic</type>
+        </field>
+        <field>
+            <fielddescr>Access LAN</fielddescr>
+            <fieldname>accesslan</fieldname>
+            <description>
+                <![CDATA[
+                Allow access to local networks (LAN) when using this peer as a router or exit node
+                ]]>
+            </description>
+            <type>checkbox</type>
+            <default_value>on</default_value>
+        </field>
+        <field>
+            <fielddescr>Accept Client Routes</fielddescr>
+            <fieldname>allowclientroutes</fieldname>
+            <description>
+                <![CDATA[
+                Accept and process client routes received from the management
+                ]]>
+            </description>
+            <type>checkbox</type>
+            <default_value>on</default_value>
+        </field>
+        <field>
+            <fielddescr>Allow Server Routes</fielddescr>
+            <fieldname>allowserverroutes</fieldname>
+            <description>
+                <![CDATA[
+                Enable this peer to act as a router for server routes received from the management
+                ]]>
+            </description>
+            <type>checkbox</type>
+            <default_value>on</default_value>
+        </field>
+
+        <field>
+            <name>Post-Quantum</name>
+            <type>listtopic</type>
+        </field>
+        <field>
+            <fielddescr>Enable Rosenpass</fielddescr>
+            <fieldname>enablerosenpass</fieldname>
+            <description>
+                <![CDATA[
+                Enable the Rosenpass to provide post-quantum secure connections
+                ]]>
+            </description>
+            <sethelp>
+                <![CDATA[
+                Experimental
+                ]]>
+            </sethelp>
+            <type>checkbox</type>
+        </field>
+        <field>
+            <fielddescr>Rosenpass Permissive Mode</fielddescr>
+            <fieldname>rosenpasspermissive</fieldname>
+            <description>
+                <![CDATA[
+                Enable this peer to accept WireGuard connections from peers that do not have Rosenpass enabled
+                ]]>
+            </description>
+            <sethelp>
+                <![CDATA[
+                Experimental
+                ]]>
+            </sethelp>
+            <type>checkbox</type>
+        </field>
+
+        <field>
+            <name>Logging</name>
+            <type>listtopic</type>
+        </field>
+        <field>
+            <fielddescr>Syslog Logging</fielddescr>
+            <fieldname>syslogenable</fieldname>
+            <description>
+                <![CDATA[
+				Enable syslog output
+				]]>
+            </description>
+            <type>checkbox</type>
+        </field>
+        <field>
+            <fielddescr>Syslog Settings</fielddescr>
+            <fieldname>syslogpriority</fieldname>
+            <description>Set the syslog logging level</description>
+            <type>select</type>
+            <default_value>info</default_value>
+            <options>
+                <option><name>INFO</name><value>info</value></option>
+                <option><name>DEBUG</name><value>debug</value></option>
+            </options>
+            <required/>
+        </field>
 
     </fields>
     <note>
