@@ -17,18 +17,27 @@ $pkg_packages = ['pfSense-pkg-netBird', 'netbird'];
 
 include('head.inc');
 
-display_top_tabs($tab_array);
-?>
+netbird_connection_info();
 
+display_top_tabs($tab_array);
+
+if (netbird_is_running()):
+?>
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h2 class="panel-title"><?=gettext("NetBird Status")?>
+            <h2 class="panel-title"><?= gettext("NetBird Status") ?>
             </h2>
         </div>
         <div class="table-responsive">
-            <p>TODO: render status report</p>
+            <?php netbird_display_peer_connection_status(); ?>
+            <?php
+            if (netbird_is_connected()){
+                netbird_display_peers_details_status();
+            }
+            ?>
         </div>
     </div>
+<?php endif; ?>
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -55,7 +64,6 @@ display_top_tabs($tab_array);
             </table>
         </div>
     </div>
-
 <?php
 include('foot.inc');
 
