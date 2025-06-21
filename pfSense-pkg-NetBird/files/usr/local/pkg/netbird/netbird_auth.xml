@@ -54,7 +54,7 @@
             <fielddescr>Management URL</fielddescr>
             <fieldname>managementurl</fieldname>
             <description>
-                <![CDATA[Base URL of management service.]]>
+                <![CDATA[Base URL of management service]]>
             </description>
             <type>input</type>
             <default_value>https://api.netbird.io:443</default_value>
@@ -77,13 +77,15 @@
             <buttonclass>btn-danger</buttonclass>
             <description>
                 <![CDATA[
-				Disconnect the machine from management service (if connected)
+				Disconnect the peer from management service (if connected)
 				]]>
             </description>
-            <placeonbottom/>
         </field>
     </fields>
 
+    <custom_php_after_head_command>
+        <![CDATA[netbird_connection_info();]]>
+    </custom_php_after_head_command>
     <custom_php_validation_command>
         <![CDATA[netbird_auth_validate_input($_POST, $input_errors);]]>
     </custom_php_validation_command>
