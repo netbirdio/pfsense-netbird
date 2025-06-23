@@ -28,12 +28,13 @@
     <name>netbird</name>
     <version>%%PKGVERSION%%</version>
     <title>VPN/NetBird</title>
+    <include_file>/usr/local/pkg/netbird/netbird.inc</include_file>
     <aftersaveredirect>/pkg_edit.php?xml=netbird.xml</aftersaveredirect>
     <menu>
         <name>NetBird</name>
         <section>VPN</section>
         <configfile>netbird.xml</configfile>
-        <url>/pkg_edit.php?xml=netbird.xml</url>
+        <url>/pkg_edit.php?xml=netbird/netbird_auth.xml</url>
     </menu>
     <menu>
         <name>NetBird</name>
@@ -62,8 +63,8 @@
             <type>listtopic</type>
         </field>
         <field>
-            <fielddescr>Wireguard Port</fielddescr>
-            <fieldname>interfaceport</fieldname>
+            <fielddescr>WireGuard Port</fielddescr>
+            <fieldname>wireguardport</fieldname>
             <description>
                 <![CDATA[
                 Wireguard interface listening port
@@ -80,7 +81,7 @@
         </field>
         <field>
             <fielddescr>Allow Configuration</fielddescr>
-            <fieldname>allowconfiguration</fieldname>
+            <fieldname>allowfirewallconfig</fieldname>
             <description>
                 <![CDATA[
                 Allow the client to manage and enforce firewall rules
@@ -96,7 +97,7 @@
         </field>
         <field>
             <fielddescr>Block Inbound Connection</fielddescr>
-            <fieldname>blockinboundconnection</fieldname>
+            <fieldname>blockinboundconn</fieldname>
             <description>
                 <![CDATA[
                 Block all inbound connections to the local machine and any routed networks
@@ -123,7 +124,6 @@
                 ]]>
             </description>
             <type>checkbox</type>
-            <default_value>on</default_value>
         </field>
 
         <field>
@@ -228,10 +228,11 @@
 				]]>
             </description>
             <type>checkbox</type>
+            <default_value>on</default_value>
         </field>
         <field>
             <fielddescr>Syslog Settings</fielddescr>
-            <fieldname>syslogpriority</fieldname>
+            <fieldname>loglevel</fieldname>
             <description>Set the syslog logging level</description>
             <type>select</type>
             <default_value>info</default_value>
@@ -248,4 +249,14 @@
 		Changes to these settings may temporarily disrupt connections and access to NetBird.
 		]]>
     </note>
+
+    <custom_php_after_head_command>
+        <![CDATA[netbird_display_connection_info();]]>
+    </custom_php_after_head_command>
+    <custom_php_validation_command>
+        <![CDATA[netbird_validate_input($_POST, $input_errors);]]>
+    </custom_php_validation_command>
+    <custom_php_resync_config_command>
+        <![CDATA[netbird_resync_config();]]>
+    </custom_php_resync_config_command>
 </packagegui>

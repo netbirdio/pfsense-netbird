@@ -1,25 +1,43 @@
 <?php
+/*
+ * netbird_status.php
+ *
+ * part of pfSense (https://www.pfsense.org)
+ * Copyright (c) 2022-2025 Rubicon Communications, LLC (Netgate)
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 require_once('guiconfig.inc');
 require_once('util.inc');
-require_once('netbird/netbird.inc');
+require_once('netbird/netbird_status.inc');
 
-$tab_array = [];
-$tab_array[] = [gettext('Authentication'), false, 'pkg_edit.php?xml=netbird/netbird_auth.xml'];
-$tab_array[] = [gettext('Settings'), false, 'pkg_edit.php?xml=netbird.xml'];
-$tab_array[] = [gettext('Status'), true, '/netbird_status.php'];
-
+$tabs = [
+    [gettext('Authentication'), false, 'pkg_edit.php?xml=netbird/netbird_auth.xml'],
+    [gettext('Settings'), false, 'pkg_edit.php?xml=netbird.xml'],
+    [gettext('Status'), true, '/netbird_status.php'],
+];
 $pgtitle = [gettext('Status'), gettext('NetBird')];
 $pglinks = ['', '@self'];
-
-$pkg_field_map = ['name' => '%n', 'version' => '%v', 'comment' => '%c'];
-$pkg_packages = ['pfSense-pkg-netBird', 'netbird'];
+$field_map = ['name' => '%n', 'version' => '%v', 'comment' => '%c'];
+$packages = ['pfSense-pkg-netBird', 'netbird'];
 
 include('head.inc');
 
-netbird_connection_info();
+netbird_display_connection_info();
 
-display_top_tabs($tab_array);
+display_top_tabs($tabs);
 
 if (netbird_is_running()):
 ?>
@@ -53,7 +71,7 @@ if (netbird_is_running()):
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach (netbird_get_pkg_info($pkg_field_map, $pkg_packages) as $package): ?>
+                <?php foreach (netbird_get_pkg_info($field_map, $packages) as $package): ?>
                     <tr>
                         <td><?=htmlspecialchars($package['name'])?></td>
                         <td><?=htmlspecialchars($package['version'])?></td>
