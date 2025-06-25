@@ -1,5 +1,5 @@
 PORTNAME=		pfSense-pkg-NetBird
-PORTVERSION=	0.0.1
+PORTVERSION=	0.1.0
 CATEGORIES=		security
 MASTER_SITES=	# empty
 DISTFILES=		# empty
