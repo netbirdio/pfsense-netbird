@@ -34,7 +34,7 @@
         <name>NetBird</name>
         <section>VPN</section>
         <configfile>netbird.xml</configfile>
-        <url>/pkg_edit.php?xml=netbird/netbird_auth.xml</url>
+        <url>/netbird_auth.php</url>
     </menu>
     <menu>
         <name>NetBird</name>
@@ -45,7 +45,7 @@
     <tabs>
         <tab>
             <text>Authentication</text>
-            <url>pkg_edit.php?xml=netbird/netbird_auth.xml</url>
+            <url>netbird_auth.php</url>
         </tab>
         <tab>
             <text>Settings</text>

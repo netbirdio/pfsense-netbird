@@ -24,7 +24,7 @@ require_once('util.inc');
 require_once('netbird/netbird_status.inc');
 
 $tabs = [
-    [gettext('Authentication'), false, 'pkg_edit.php?xml=netbird/netbird_auth.xml'],
+    [gettext('Authentication'), false, '/netbird_auth.php'],
     [gettext('Settings'), false, 'pkg_edit.php?xml=netbird.xml'],
     [gettext('Status'), true, '/netbird_status.php'],
 ];

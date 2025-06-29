@@ -36,15 +36,11 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/netbird/*.inc \
 		${STAGEDIR}${PREFIX}/pkg/netbird
 
-	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/netbird/*.xml \
-		${STAGEDIR}${PREFIX}/pkg/netbird
-
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/www/*.php \
 		${STAGEDIR}${PREFIX}/www
 
 	@${REINPLACE_CMD} -i '' -e "s|%%PKGVERSION%%|${PKGVERSION}|" \
 		${STAGEDIR}${DATADIR}/info.xml \
-		${STAGEDIR}${PREFIX}/pkg/netbird.xml \
-		${STAGEDIR}${PREFIX}/pkg/netbird/netbird_auth.xml
+		${STAGEDIR}${PREFIX}/pkg/netbird.xml
 
 .include <bsd.port.mk>

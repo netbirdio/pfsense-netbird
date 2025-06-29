@@ -27,6 +27,8 @@ define('PKG_BIN', '/usr/sbin/pkg');
 
 function netbird_resync_config()
 {
+    // TODO: handle this properly (not the default page)
+    // handle install and de-install clenup
     if (netbird_is_connected()) {
         if (!netbird_disconnect()) {
             return;
@@ -114,7 +116,7 @@ function netbird_display_connection_info(): void
         $type = 'danger';
         $closable = false;
     } elseif (!netbird_is_connected()) {
-        $message = gettext('NetBird is not connected. Refresh or check the NetBird status page.');
+        $message = gettext('NetBird is not connected.');
         $type = 'warning';
         $closable = false;
     } else {
