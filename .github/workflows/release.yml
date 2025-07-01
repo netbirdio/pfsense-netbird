@@ -13,10 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-pfsense-package:
-    name: Build NetBird Package (FreeBSD)
+  release:
     runs-on: ubuntu-22.04
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,7 +27,7 @@ jobs:
           copyback: true
           release: "15.0"
           prepare: |
-            pkg install -y git go123 go124 ca_root_nss poudriere
+            pkg install -y git go124 ca_root_nss poudriere
             git clone -b devel --depth 1 --single-branch https://github.com/pfsense/FreeBSD-ports.git /usr/ports
           run: |
             set -ex
@@ -50,6 +48,27 @@ jobs:
       - name: Upload FreeBSD package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: freebsd-package
+          name: FreeBSD-package
           path: netbird/work/pkg/netbird-*.pkg
           retention-days: 3
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload packages to release page
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+              pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg
+              netbird/work/pkg/netbird-*.pkg
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
