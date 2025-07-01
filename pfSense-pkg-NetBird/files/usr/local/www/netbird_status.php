@@ -23,6 +23,8 @@ require_once('guiconfig.inc');
 require_once('util.inc');
 require_once('netbird/netbird_status.inc');
 
+$shortcut_section = 'netbird';
+
 $tabs = [
     [gettext('Authentication'), false, '/netbird_auth.php'],
     [gettext('Settings'), false, 'pkg_edit.php?xml=netbird.xml'],

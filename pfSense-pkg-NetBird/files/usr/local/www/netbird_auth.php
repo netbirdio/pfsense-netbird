@@ -24,6 +24,7 @@ require_once('util.inc');
 require_once("classes/autoload.inc.php");
 require_once('netbird/netbird.inc');
 
+$shortcut_section = 'netbird';
 
 $config_path = &$config['installedpackages']['netbird']['config'][0];
 

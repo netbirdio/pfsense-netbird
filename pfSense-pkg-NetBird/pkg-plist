@@ -4,3 +4,4 @@ pkg/netbird/netbird_status.inc
 %%DATADIR%%/info.xml
 www/netbird_status.php
 www/netbird_auth.php
+www/shortcuts/pkg_netbird.inc

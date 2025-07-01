@@ -20,8 +20,11 @@
  */
 
 require_once('service-utils.inc');
+require_once("config.inc");
+require_once("util.inc");
 
 define('NETBIRD_BIN', '/usr/local/bin/netbird');
+define('NETBIRD_CONFIG', '/var/db/netbird/config.json');
 define('PKG_BIN', '/usr/sbin/pkg');
 
 
@@ -126,5 +129,39 @@ function netbird_display_connection_info(): void
     }
 
     print_info_box($message, $type, $closable ? 'close' : false);
+}
+
+function netbird_write_rcfile() {
+    $rc['file'] = 'netbird.sh';
+    $rc['start'] .= "/usr/local/bin/netbird service start\n\t";
+    $rc['stop'] .= "/usr/local/bin/netbird service stop\n\t";
+    $rc['restart'] .= "/usr/local/bin/netbird service restart\n\t";
+    write_rcfile($rc);
+}
+
+function netbird_install()
+{
+    netbird_write_rcfile();
+
+    if (!netbird_is_running()){
+        $cmd = implode(' ', [NETBIRD_BIN, 'service', 'start']);
+        exec($cmd);
+    }
+}
+
+function netbird_deinstall()
+{
+    global $config;
+
+    if (netbird_is_running()) {
+        stop_service("netbird");
+    }
+
+    unlink_if_exists(NETBIRD_CONFIG);
+
+    if (isset($config['installedpackages']['netbird'])) {
+        unset($config['installedpackages']['netbird']);
+        write_config("Removed netbird configuration");
+    }
 }
 ?>
