@@ -268,7 +268,7 @@
     <custom_php_validation_command>
         <![CDATA[netbird_validate_input($_POST, $input_errors);]]>
     </custom_php_validation_command>
-<!--    <custom_php_resync_config_command>-->
-<!--        <![CDATA[netbird_resync_config();]]>-->
-<!--    </custom_php_resync_config_command>-->
+    <custom_php_resync_config_command>
+        <![CDATA[netbird_resync_config();]]>
+    </custom_php_resync_config_command>
 </packagegui>

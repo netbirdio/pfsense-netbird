@@ -30,42 +30,46 @@ define('PKG_BIN', '/usr/sbin/pkg');
 
 function netbird_resync_config()
 {
-    // TODO: handle this properly (not the default page)
-    // handle install and de-install clenup
+    $json = file_get_contents(NETBIRD_CONFIG);
+    $config = json_decode($json, true);
+
+    if (!is_array($config)) {
+        log_error("Invalid netbird configuration");
+        return;
+    }
+
+    if (!empty($_POST['wireguardport'])) {
+        $config['WgPort'] = (int)$_POST['wireguardport'];
+    }
+
+    $config_map = [
+        'enablessh' => ['ServerSSHAllowed', true],
+        'blockinboundconn' => ['BlockInbound', true],
+        'allowfirewallconfig' => ['DisableFirewall', false],
+        'enabledns' => ['DisableDNS', false],
+        'accesslan' => ['BlockLANAccess', false],
+        'allowclientroutes' => ['DisableClientRoutes', false],
+        'allowserverroutes' => ['DisableServerRoutes', false],
+        'enablerosenpass' => ['RosenpassEnabled', true],
+        'rosenpasspermissive' => ['RosenpassPermissive', true],
+    ];
+
+    foreach ($config_map as $post_key => [$json_key, $enabled_val]) {
+        $checked = ($_POST[$post_key] ?? '') === 'on';
+        $config[$json_key] = ($checked === $enabled_val);
+    }
+
+    file_put_contents(NETBIRD_CONFIG, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+
     if (netbird_is_connected()) {
         if (!netbird_disconnect()) {
             return;
         }
+
+        $cmd = implode(' ', [NETBIRD_BIN, 'up']);
+        exec($cmd);
     }
-
-
-    $cmd = [NETBIRD_BIN, 'up'];
-
-    if (!empty($_POST['wireguardport'])) {
-        $cmd[] = '--wireguard-port=' . escapeshellarg((int)$_POST['wireguardport']);
-    }
-    if (!empty($_POST['loglevel'])) {
-        $cmd[] = '--log-level=' . escapeshellarg($_POST['loglevel']);
-    }
-
-    $options = [
-        'enablessh'            => ['--allow-server-ssh', true],
-        'blockinboundconn'     => ['--block-inbound', true],
-        'allowfirewallconfig'    => ['--disable-firewall', false],
-        'enabledns'            => ['--disable-dns', false],
-        'accesslan'            => ['--block-lan-access', false],
-        'allowclientroutes'    => ['--disable-client-routes', false],
-        'allowserverroutes'    => ['--disable-server-routes', false],
-        'enablerosenpass'      => ['--enable-rosenpass', true],
-        'rosenpasspermissive'  => ['--rosenpass-permissive', true],
-    ];
-
-    foreach ($options as $key => [$flag, $enabled_value]) {
-        $is_checked = ($_POST[$key] ?? '') === 'on';
-        $cmd[] = $flag . '=' . ($is_checked === $enabled_value ? 'true' : 'false');
-    }
-
-    exec(implode(' ', $cmd));
 }
 
 
