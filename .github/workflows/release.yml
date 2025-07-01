@@ -21,7 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build on FreeBSD
+      - name: Build
         id: build
         uses: vmactions/freebsd-vm@v1
         with:
@@ -29,18 +29,27 @@ jobs:
           copyback: true
           release: "15.0"
           prepare: |
-            pkg install -y git go124 ca_root_nss poudriere
+            pkg install -y git go123 go124 ca_root_nss poudriere
             git clone -b devel --depth 1 --single-branch https://github.com/pfsense/FreeBSD-ports.git /usr/ports
           run: |
             set -ex
             cd pfSense-pkg-NetBird
             make
             make package
-            ls -lh
+            cd ../netbird
+            make makesum
+            make package
 
-      - name: Upload package artifact
+      - name: Upload pfSense package artifact
         uses: actions/upload-artifact@v4
         with:
           name: pfSense-package
           path: pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg
-          retention-days: 7
+          retention-days: 3
+
+      - name: Upload FreeBSD package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: freebsd-package
+          path: netbird/work/pkg/netbird-*.pkg
+          retention-days: 3
