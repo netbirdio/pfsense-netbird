@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.head_ref || github.actor_id }}
+  cancel-in-progress: true
+
+jobs:
+  build-pfsense-package:
+    name: Build NetBird Package (FreeBSD)
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build on FreeBSD
+        id: build
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          copyback: true
+          release: "15.0"
+          run: |
+            set -ex
+            make
+            make package
+            ls -lh work/pkg/
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pfSense-package
+          path: work/pkg/pfSense-pkg-NetBird-*.pkg
+          retention-days: 7
