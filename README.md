@@ -28,8 +28,9 @@ You can then transfer this file to your pfSense system and install it manually.
 To install the package manually on pfSense:
 
 ```
-pkg remove pfSense-pkg-NetBird-<version>
-pkg add pfSense-pkg-NetBird-<version>.pkg
+pkg add netbird-<version>.pkg
+
+pkg add -f pfSense-pkg-NetBird-<version>.pkg
 ```
 
 Once installed, **NetBird** will appear under the **VPN** menu in the pfSense Web UI.
