@@ -28,15 +28,19 @@ jobs:
           usesh: true
           copyback: true
           release: "15.0"
+          prepare: |
+              pkg install -y git poudriere portsnap
+              portsnap fetch extract
           run: |
             set -ex
+            cd pfSense-pkg-NetBird
             make
             make package
-            ls -lh work/pkg/
+            ls -lh
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
         with:
           name: pfSense-package
-          path: work/pkg/pfSense-pkg-NetBird-*.pkg
+          path: pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg
           retention-days: 7
