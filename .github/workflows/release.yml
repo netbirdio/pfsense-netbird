@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+    branches:
+      - main
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.head_ref || github.actor_id }}
+  cancel-in-progress: true
+
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        id: build
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          copyback: true
+          release: "15.0"
+          prepare: |
+            pkg install -y git go124 ca_root_nss poudriere
+            git clone -b devel --depth 1 --single-branch https://github.com/pfsense/FreeBSD-ports.git /usr/ports
+          run: |
+            set -ex
+            cd pfSense-pkg-NetBird
+            make
+            make package
+            cd ../netbird
+            make makesum
+            make package
+
+      - name: Upload pfSense package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pfSense-package
+          path: pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg
+          retention-days: 3
+
+      - name: Upload FreeBSD package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FreeBSD-package
+          path: netbird/work/pkg/netbird-*.pkg
+          retention-days: 3
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload packages to release page
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+              pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg
+              netbird/work/pkg/netbird-*.pkg
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
