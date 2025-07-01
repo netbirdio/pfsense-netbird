@@ -26,8 +26,10 @@ require_once('netbird/netbird.inc');
 
 $shortcut_section = 'netbird';
 
-$config_path = &$config['installedpackages']['netbird']['config'][0];
-
+$auth_config = &$config['installedpackages']['netbird']['auth'];
+if (!is_array($auth_config)) {
+    $auth_config = [];
+}
 
 if ($_POST) {
     if (isset($_POST['connect'])) {
@@ -45,10 +47,10 @@ if ($_POST) {
 
 
         if (empty($input_errors)) {
-            if ($setup_key !== $config_path['setupkey']) {
-                $config_path['setupkey'] = $setup_key;
+            if ($setup_key !== $auth_config['setupkey']) {
+                $auth_config['setupkey'] = $setup_key;
             }
-            $config_path['managementurl'] = $management_url;
+            $auth_config['managementurl'] = $management_url;
 
             if (netbird_is_connected() && !netbird_disconnect()) {
                 return;
@@ -100,8 +102,8 @@ if ($input_errors) {
 netbird_display_connection_info();
 display_top_tabs($tabs);
 
-$management_url = $config_path['managementurl'] ?? 'https://api.netbird.io:443';
-$setup_key = $config_path['setupkey'] ?? '';
+$management_url = $auth_config['managementurl'] ?? 'https://api.netbird.io:443';
+$setup_key = $auth_config['setupkey'] ?? '';
 
 $masked_key = '';
 if (!empty($setup_key)) {
