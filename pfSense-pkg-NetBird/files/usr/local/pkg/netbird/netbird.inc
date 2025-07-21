@@ -55,8 +55,10 @@ function netbird_resync_config()
     ];
 
     foreach ($config_map as $post_key => [$json_key, $enabled_val]) {
-        $checked = ($_POST[$post_key] ?? '') === 'on';
-        $config[$json_key] = ($checked === $enabled_val);
+        if (array_key_exists($post_key, $_POST)) {
+            $checked = $_POST[$post_key] === 'on';
+            $config[$json_key] = ($checked === $enabled_val);
+        }
     }
 
     file_put_contents(NETBIRD_CONFIG, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
