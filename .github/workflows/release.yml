@@ -15,6 +15,10 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        arch: [x86_64, aarch64]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,6 +30,7 @@ jobs:
           usesh: true
           copyback: true
           release: "14.3"
+          arch: ${{ matrix.arch }}
           prepare: |
             pkg install -y git go124 ca_root_nss poudriere
             git clone -b devel --depth 1 --single-branch https://github.com/pfsense/FreeBSD-ports.git /usr/ports
@@ -38,22 +43,38 @@ jobs:
             make makesum
             make package
 
+      - name: Rename pfSense package with arch
+        run: |
+          for f in pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg; do
+            mv "$f" "${f%.pkg}-${{ matrix.arch }}.pkg"
+          done
+
+      - name: Rename FreeBSD package with arch
+        run: |
+          for f in netbird/work/pkg/netbird-*.pkg; do
+            mv "$f" "${f%.pkg}-${{ matrix.arch }}.pkg"
+          done
+
       - name: Upload pfSense package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pfSense-package
+          name: pfSense-package-${{ matrix.arch }}
           path: pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg
           retention-days: 3
 
       - name: Upload FreeBSD package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FreeBSD-package
+          name: FreeBSD-package-${{ matrix.arch }}
           path: netbird/work/pkg/netbird-*.pkg
           retention-days: 3
 
+  release_publish:
+    needs: release
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/create-release@v1
         with:
           tag_name: ${{ github.ref_name }}
@@ -63,12 +84,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
       - name: Upload packages to release page
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-              pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg
-              netbird/work/pkg/netbird-*.pkg
+          files: artifacts/**/*
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
