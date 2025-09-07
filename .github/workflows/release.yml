@@ -25,14 +25,27 @@ jobs:
 
       - name: Build
         id: build
-        uses: vmactions/freebsd-vm@v1
+        uses: vmactions/freebsd-vm@v1.2.3
         with:
           usesh: true
           copyback: true
-          release: "14.3"
           arch: ${{ matrix.arch }}
+          release: "15.0"
+
           prepare: |
-            pkg install -y git go124 ca_root_nss poudriere
+            pkg lock -y pkg
+            mkdir -p /usr/local/etc/pkg/repos
+            sh -c 'cat > /usr/local/etc/pkg/repos/FreeBSD.conf <<EOF
+            FreeBSD: {
+              url: "pkg+http://pkg.FreeBSD.org/FreeBSD:14:amd64/quarterly",
+              mirror_type: "srv",
+              signature_type: "fingerprints",
+              fingerprints: "/usr/share/keys/pkg",
+              enabled: yes
+            }
+            EOF'
+            env ABI=FreeBSD:14:amd64 env IGNORE_OSVERSION=yes pkg update
+            pkg install -y git go124 ca_root_nss 
             git clone -b devel --depth 1 --single-branch https://github.com/pfsense/FreeBSD-ports.git /usr/ports
           run: |
             set -ex
