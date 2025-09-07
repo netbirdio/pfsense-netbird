@@ -17,7 +17,11 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        arch: [x86_64, aarch64]
+        include:
+        -  arch: x86_64
+           repo_arch: amd64
+        -  arch: aarch64
+           repo_arch: aarch64
 
     steps:
       - name: Checkout
@@ -37,14 +41,14 @@ jobs:
             mkdir -p /usr/local/etc/pkg/repos
             sh -c 'cat > /usr/local/etc/pkg/repos/FreeBSD.conf <<EOF
             FreeBSD: {
-              url: "pkg+http://pkg.FreeBSD.org/FreeBSD:14:amd64/quarterly",
+              url: "pkg+http://pkg.FreeBSD.org/FreeBSD:14:${{ matrix.repo_arch }}/quarterly",
               mirror_type: "srv",
               signature_type: "fingerprints",
               fingerprints: "/usr/share/keys/pkg",
               enabled: yes
             }
             EOF'
-            env ABI=FreeBSD:14:amd64 env IGNORE_OSVERSION=yes pkg update
+            env ABI=FreeBSD:14:${{ matrix.repo_arch }} env IGNORE_OSVERSION=yes pkg update
             pkg install -y git go124 ca_root_nss 
             git clone -b devel --depth 1 --single-branch https://github.com/pfsense/FreeBSD-ports.git /usr/ports
           run: |
