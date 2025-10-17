@@ -15,6 +15,14 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+        -  arch: x86_64
+           repo_arch: amd64
+        -  arch: aarch64
+           repo_arch: aarch64
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,20 +33,22 @@ jobs:
         with:
           usesh: true
           copyback: true
+          arch: ${{ matrix.arch }}
           release: "15.0"
+
           prepare: |
             pkg lock -y pkg
             mkdir -p /usr/local/etc/pkg/repos
             sh -c 'cat > /usr/local/etc/pkg/repos/FreeBSD.conf <<EOF
             FreeBSD: {
-              url: "pkg+http://pkg.FreeBSD.org/FreeBSD:14:amd64/quarterly",
+              url: "pkg+http://pkg.FreeBSD.org/FreeBSD:14:${{ matrix.repo_arch }}/quarterly",
               mirror_type: "srv",
               signature_type: "fingerprints",
               fingerprints: "/usr/share/keys/pkg",
               enabled: yes
             }
             EOF'
-            env ABI=FreeBSD:14:amd64 env IGNORE_OSVERSION=yes pkg update
+            env ABI=FreeBSD:14:${{ matrix.repo_arch }} env IGNORE_OSVERSION=yes pkg update
             pkg install -y git go124 ca_root_nss 
             git clone -b devel --depth 1 --single-branch https://github.com/pfsense/FreeBSD-ports.git /usr/ports
           run: |
@@ -50,22 +60,38 @@ jobs:
             make makesum
             make package
 
+      - name: Rename pfSense package with arch
+        run: |
+          for f in pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg; do
+            mv "$f" "${f%.pkg}-${{ matrix.arch }}.pkg"
+          done
+
+      - name: Rename FreeBSD package with arch
+        run: |
+          for f in netbird/work/pkg/netbird-*.pkg; do
+            mv "$f" "${f%.pkg}-${{ matrix.arch }}.pkg"
+          done
+
       - name: Upload pfSense package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pfSense-package
+          name: pfSense-package-${{ matrix.arch }}
           path: pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg
           retention-days: 3
 
       - name: Upload FreeBSD package artifact
         uses: actions/upload-artifact@v4
         with:
-          name: FreeBSD-package
+          name: FreeBSD-package-${{ matrix.arch }}
           path: netbird/work/pkg/netbird-*.pkg
           retention-days: 3
 
+  release_publish:
+    needs: release
+    runs-on: ubuntu-22.04
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
       - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: actions/create-release@v1
         with:
           tag_name: ${{ github.ref_name }}
@@ -75,12 +101,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
       - name: Upload packages to release page
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-              pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg
-              netbird/work/pkg/netbird-*.pkg
+          files: artifacts/**/*
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
