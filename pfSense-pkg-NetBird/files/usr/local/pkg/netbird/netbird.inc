@@ -67,10 +67,6 @@ function netbird_resync_config()
         }
     }
 
-    if (isset($settings['sshjwtcachettl']) && $settings['sshjwtcachettl'] !== '') {
-        $config['SSHJWTCacheTTL'] = (int)$settings['sshjwtcachettl'];
-    }
-
     file_put_contents(NETBIRD_CONFIG, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
 
@@ -92,10 +88,6 @@ function netbird_validate_input($post, &$input_errors)
         $input_errors[] = sprintf(gettext('WireGuard port (%s) is not a valid port.'), $wireguard_port);
     }
 
-    $ssh_jwt_cache_ttl = $post['sshjwtcachettl'];
-    if (!empty($ssh_jwt_cache_ttl) && (!ctype_digit($ssh_jwt_cache_ttl) || (int)$ssh_jwt_cache_ttl < 0)) {
-        $input_errors[] = sprintf(gettext('SSH JWT Cache TTL (%s) must be a non-negative integer.'), $ssh_jwt_cache_ttl);
-    }
 }
 
 function netbird_is_connected(): bool

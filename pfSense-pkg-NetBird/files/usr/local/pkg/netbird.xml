@@ -140,11 +140,6 @@
                 Allow root user login
                 ]]>
             </description>
-            <sethelp>
-                <![CDATA[
-                Use with caution
-                ]]>
-            </sethelp>
             <type>checkbox</type>
         </field>
         <field>
@@ -192,17 +187,6 @@
             </sethelp>
             <type>checkbox</type>
             <default_value>on</default_value>
-        </field>
-        <field>
-            <fielddescr>JWT Cache TTL</fielddescr>
-            <fieldname>sshjwtcachettl</fieldname>
-            <description>
-                <![CDATA[
-                Enable JWT token caching with specified TTL in seconds (default: 0, disabled)
-                ]]>
-            </description>
-            <type>input</type>
-            <default_value>0</default_value>
         </field>
 
         <field>
