@@ -31,8 +31,8 @@ do-install:
 	${INSTALL_DATA} ${FILESDIR}${DATADIR}/info.xml \
 		${STAGEDIR}${DATADIR}
 
-	${INSTALL_SCRIPT} ${FILESDIR}${PREFIX}/etc/rc.d/* \
-		${STAGEDIR}${PREFIX}/etc/rc.d
+	${INSTALL_SCRIPT} ${FILESDIR}${PREFIX}/etc/rc.d/netbird_interface.sh \
+		${STAGEDIR}${PREFIX}/etc/rc.d/netbird_interface.sh
 
 	${INSTALL_DATA} ${FILESDIR}${PREFIX}/pkg/*.xml \
 		${STAGEDIR}${PREFIX}/pkg
