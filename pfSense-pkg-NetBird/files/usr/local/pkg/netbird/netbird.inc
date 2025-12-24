@@ -154,31 +154,7 @@ function netbird_write_rcfile() {
 
 function netbird_install()
 {
-    global $config;
-
     netbird_write_rcfile();
-
-    if (!is_array($config['system'])) {
-        $config['system'] = [];
-    }
-    if (!is_array($config['system']['earlyshellcmd'])) {
-        $config['system']['earlyshellcmd'] = [];
-    }
-
-    $netbird_boot_cmd = NETBIRD_BIN . ' service start';
-
-    $cmd_exists = false;
-    foreach ($config['system']['earlyshellcmd'] as $cmd) {
-        if (strpos($cmd, NETBIRD_BIN . ' service start') !== false) {
-            $cmd_exists = true;
-            break;
-        }
-    }
-
-    if (!$cmd_exists) {
-        $config['system']['earlyshellcmd'][] = $netbird_boot_cmd;
-        write_config("NetBird: Added early boot hook");
-    }
 
     if (!netbird_is_running()){
         $cmd = implode(' ', [NETBIRD_BIN, 'service', 'start']);
@@ -192,16 +168,6 @@ function netbird_deinstall()
 
     if (netbird_is_running()) {
         stop_service("netbird");
-    }
-
-    if (is_array($config['system']['earlyshellcmd'])) {
-        foreach ($config['system']['earlyshellcmd'] as $key => $cmd) {
-            if (strpos($cmd, NETBIRD_BIN . ' service start') !== false) {
-                unset($config['system']['earlyshellcmd'][$key]);
-                write_config("NetBird: Removed early boot hook");
-                break;
-            }
-        }
     }
 
     unlink_if_exists(NETBIRD_CONFIG);

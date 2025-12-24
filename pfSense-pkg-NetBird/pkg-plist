@@ -1,3 +1,4 @@
+etc/rc.d/interface.sh
 pkg/netbird.xml
 pkg/netbird/netbird.inc
 pkg/netbird/netbird_status.inc
