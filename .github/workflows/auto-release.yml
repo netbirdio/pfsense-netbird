@@ -8,7 +8,7 @@ on:
 
 jobs:
   auto-release:
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'dependencies')
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'netbird-release')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

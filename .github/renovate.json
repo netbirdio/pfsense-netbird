@@ -26,9 +26,11 @@
     {
       "matchDatasources": ["github-releases"],
       "matchDepNames": ["netbirdio/netbird"],
-      "commitMessageTopic": "Update NetBird client",
+      "commitMessageTopic": "NetBird client",
       "commitMessageExtra": "to {{newVersion}}",
-      "automerge": true
+      "automerge": true,
+      "platformAutomerge": true,
+      "addLabels": ["netbird-release"]
     }
   ]
 }
