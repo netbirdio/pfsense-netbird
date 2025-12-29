@@ -73,14 +73,14 @@ jobs:
           done
 
       - name: Upload pfSense package artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: pfSense-package-${{ matrix.arch }}
           path: pfSense-pkg-NetBird/work/pkg/pfSense-pkg-NetBird-*.pkg
           retention-days: 3
 
       - name: Upload FreeBSD package artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: FreeBSD-package-${{ matrix.arch }}
           path: netbird/work/pkg/netbird-*.pkg
@@ -102,7 +102,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           path: artifacts
 
