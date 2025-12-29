@@ -46,7 +46,7 @@ if ($_POST) {
             $input_errors[] = gettext('Setup Key is required.');
         }
         if (!empty($hostname) && !preg_match('/^[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9]$/', $hostname)) {
-            $input_errors[] = sprintf(gettext('Hostname (%s) contains invalid characters. Use only letters, numbers, hyphens, and dots.'), $hostname);
+            $input_errors[] = sprintf(gettext('Hostname (%s) contains invalid characters. Use only letters, numbers and hyphens.'), $hostname);
         }
 
 
