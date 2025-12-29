@@ -117,6 +117,9 @@ display_top_tabs($tabs);
 $management_url = $auth_config['managementurl'] ?? 'https://api.netbird.io:443';
 $setup_key = $auth_config['setupkey'] ?? '';
 $hostname = $auth_config['hostname'] ?? '';
+if (empty($hostname)) {
+    $hostname = $config['system']['hostname'] ?? '';
+}
 
 $masked_key = '';
 if (!empty($setup_key)) {
@@ -147,7 +150,7 @@ $section->addInput(new Form_Input(
     'Hostname',
     'text',
     $hostname
-))->setHelp('Sets a custom hostname for the device (optional)');
+))->setHelp('Sets a custom hostname for the device');
 
 if (netbird_is_connected()) {
     $button = new Form_Button(
