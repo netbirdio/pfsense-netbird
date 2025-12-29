@@ -3,6 +3,7 @@
   "extends": [
     "config:base"
   ],
+  "rebaseWhen": "behind-base-branch",
   "baseBranches": ["main"],
   "prConcurrentLimit": 5,
   "prHourlyLimit": 0,
@@ -27,7 +28,6 @@
       "matchDepNames": ["netbirdio/netbird"],
       "commitMessageTopic": "Update NetBird client",
       "commitMessageExtra": "to {{newVersion}}",
-      "automergeType": "pr",
       "automerge": true
     }
   ]
