@@ -3,7 +3,7 @@
   "extends": [
     "config:base"
   ],
-  "baseBranches": ["main", "update-ci"],
+  "baseBranches": ["main"],
   "prConcurrentLimit": 5,
   "prHourlyLimit": 0,
   "labels": ["dependencies"],
@@ -25,10 +25,10 @@
     {
       "matchDatasources": ["github-releases"],
       "matchDepNames": ["netbirdio/netbird"],
-      "commitMessageTopic": "NetBird client",
+      "commitMessageTopic": "Update NetBird client",
       "commitMessageExtra": "to {{newVersion}}",
-      "prTitle": "Update NetBird client to {{newVersion}}",
-      "automergeType": "pr"
+      "automergeType": "pr",
+      "automerge": true
     }
   ]
 }
