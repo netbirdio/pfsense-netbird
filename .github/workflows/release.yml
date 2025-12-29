@@ -107,7 +107,7 @@ jobs:
           path: artifacts
 
       - name: Upload packages to release page
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: artifacts/**/*
         env:
