@@ -29,7 +29,7 @@ jobs:
 
       - name: Build
         id: build
-        uses: vmactions/freebsd-vm@v1.3.4
+        uses: vmactions/freebsd-vm@v1.3.6
         with:
           usesh: true
           copyback: true
