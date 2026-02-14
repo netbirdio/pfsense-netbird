@@ -15,6 +15,7 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-24.04
+    timeout-minutes: 180
     strategy:
       matrix:
         include:
@@ -38,15 +39,21 @@ jobs:
 
           prepare: |
             pkg install -y git go124 ca_root_nss 
-            git clone -b devel --depth 1 --single-branch https://github.com/pfsense/FreeBSD-ports.git /usr/ports
+            git clone --depth 1 --single-branch -b devel --filter=blob:none --sparse https://github.com/pfsense/FreeBSD-ports.git /usr/ports
+            cd /usr/ports
+            git sparse-checkout set Mk Templates Keywords
           run: |
             set -ex
-            cd pfSense-pkg-NetBird
-            make
-            make package
-            cd ../netbird
+            # Build and install netbird FIRST so pfSense-pkg-NetBird's
+            # RUN_DEPENDS finds it already installed and skips a rebuild
+            cd netbird
             make makesum
-            make package
+            make install BATCH=yes DISABLE_VULNERABILITIES=yes
+            make package BATCH=yes DISABLE_VULNERABILITIES=yes
+
+            cd ../pfSense-pkg-NetBird
+            make BATCH=yes DISABLE_VULNERABILITIES=yes
+            make package BATCH=yes DISABLE_VULNERABILITIES=yes
 
       - name: Rename pfSense package with arch
         run: |
