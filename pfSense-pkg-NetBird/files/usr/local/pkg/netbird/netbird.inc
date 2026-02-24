@@ -174,7 +174,7 @@ function netbird_deinstall()
 
     if (isset($config['installedpackages']['netbird'])) {
         unset($config['installedpackages']['netbird']);
-        write_config("Removed netbird configuration");
+        write_config("NetBird: Removed configuration");
     }
 }
 ?>
