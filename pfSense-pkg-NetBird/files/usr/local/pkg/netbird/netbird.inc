@@ -26,6 +26,7 @@ require_once("util.inc");
 define('NETBIRD_BIN', '/usr/local/bin/netbird');
 define('NETBIRD_CONFIG', '/var/db/netbird/config.json');
 define('PKG_BIN', '/usr/sbin/pkg');
+define('NETBIRD_IFACE_CMD', '/sbin/ifconfig wt0 >/dev/null 2>&1 || /sbin/ifconfig tun create name wt0 >/dev/null 2>&1');
 
 
 function netbird_resync_config()
@@ -155,6 +156,7 @@ function netbird_write_rcfile() {
 function netbird_install()
 {
     netbird_write_rcfile();
+    netbird_ensure_earlyshellcmd();
 
     if (!netbird_is_running()){
         $cmd = implode(' ', [NETBIRD_BIN, 'service', 'start']);
@@ -171,10 +173,67 @@ function netbird_deinstall()
     }
 
     unlink_if_exists(NETBIRD_CONFIG);
+    netbird_remove_earlyshellcmd();
 
     if (isset($config['installedpackages']['netbird'])) {
         unset($config['installedpackages']['netbird']);
-        write_config("Removed netbird configuration");
+    }
+
+    write_config("NetBird: Removed package configuration");
+}
+
+/**
+ * Register an earlyshellcmd that pre-creates the wt0 tunnel interface
+ * before pfSense runs interface assignment during boot. This prevents
+ * the "interface mismatch" error when wt0 is assigned to a pfSense
+ * interface (e.g. OPT1) and the system reboots.
+ */
+function netbird_ensure_earlyshellcmd()
+{
+    global $config;
+
+    $cmd = NETBIRD_IFACE_CMD;
+
+    $earlyshellcmds = isset($config['system']['earlyshellcmd'])
+        ? $config['system']['earlyshellcmd']
+        : [];
+
+    if (!is_array($earlyshellcmds)) {
+        $earlyshellcmds = !empty($earlyshellcmds) ? [$earlyshellcmds] : [];
+    }
+
+    if (!in_array($cmd, $earlyshellcmds)) {
+        $earlyshellcmds[] = $cmd;
+        $config['system']['earlyshellcmd'] = $earlyshellcmds;
+        write_config("NetBird: Added early boot interface creation");
+    }
+}
+
+/**
+ * Remove the NetBird earlyshellcmd during package uninstall.
+ */
+function netbird_remove_earlyshellcmd()
+{
+    global $config;
+
+    if (!isset($config['system']['earlyshellcmd'])) {
+        return;
+    }
+
+    $earlyshellcmds = $config['system']['earlyshellcmd'];
+    if (!is_array($earlyshellcmds)) {
+        $earlyshellcmds = [$earlyshellcmds];
+    }
+
+    $cmd = NETBIRD_IFACE_CMD;
+    $earlyshellcmds = array_values(array_filter($earlyshellcmds, function($c) use ($cmd) {
+        return $c !== $cmd;
+    }));
+
+    if (empty($earlyshellcmds)) {
+        unset($config['system']['earlyshellcmd']);
+    } else {
+        $config['system']['earlyshellcmd'] = $earlyshellcmds;
     }
 }
 ?>
