@@ -26,11 +26,13 @@ require_once("util.inc");
 define('NETBIRD_BIN', '/usr/local/bin/netbird');
 define('NETBIRD_CONFIG', '/var/db/netbird/config.json');
 define('PKG_BIN', '/usr/sbin/pkg');
-define('NETBIRD_IFACE_CMD', '/sbin/ifconfig wt0 >/dev/null 2>&1 || /sbin/ifconfig tun create name wt0 >/dev/null 2>&1');
+define('NETBIRD_EARLY_RCSCRIPT', '/etc/rc.d/netbird_early.sh');
 
 
 function netbird_resync_config()
 {
+    netbird_install_early_rcscript();
+
     $json = file_get_contents(NETBIRD_CONFIG);
     $config = json_decode($json, true);
 
@@ -156,7 +158,7 @@ function netbird_write_rcfile() {
 function netbird_install()
 {
     netbird_write_rcfile();
-    netbird_ensure_earlyshellcmd();
+    netbird_install_early_rcscript();
 
     if (!netbird_is_running()){
         $cmd = implode(' ', [NETBIRD_BIN, 'service', 'start']);
@@ -173,7 +175,7 @@ function netbird_deinstall()
     }
 
     unlink_if_exists(NETBIRD_CONFIG);
-    netbird_remove_earlyshellcmd();
+    unlink_if_exists(NETBIRD_EARLY_RCSCRIPT);
 
     if (isset($config['installedpackages']['netbird'])) {
         unset($config['installedpackages']['netbird']);
@@ -183,57 +185,43 @@ function netbird_deinstall()
 }
 
 /**
- * Register an earlyshellcmd that pre-creates the wt0 tunnel interface
- * before pfSense runs interface assignment during boot. This prevents
- * the "interface mismatch" error when wt0 is assigned to a pfSense
- * interface (e.g. OPT1) and the system reboots.
+ * Write a FreeBSD rc.d script to /etc/rc.d/ that pre-creates the wt0
+ * tunnel interface. Using REQUIRE: FILESYSTEMS and BEFORE: netif places
+ * this in the FreeBSD NETWORKING phase, which runs before pfSense's
+ * LOCAL phase bootup (where the interface mismatch check occurs).
  */
-function netbird_ensure_earlyshellcmd()
+function netbird_install_early_rcscript()
 {
-    global $config;
+    $script = <<<'RCSCRIPT'
+#!/bin/sh
+#
+# PROVIDE: netbird_early
+# REQUIRE: FILESYSTEMS
+# BEFORE: netif
+# KEYWORD: nojail
 
-    $cmd = NETBIRD_IFACE_CMD;
+. /etc/rc.subr
 
-    $earlyshellcmds = isset($config['system']['earlyshellcmd'])
-        ? $config['system']['earlyshellcmd']
-        : [];
+name="netbird_early"
+desc="Pre-create NetBird wt0 tunnel interface"
+rcvar="${name}_enable"
+start_cmd="${name}_start"
+stop_cmd=":"
 
-    if (!is_array($earlyshellcmds)) {
-        $earlyshellcmds = !empty($earlyshellcmds) ? [$earlyshellcmds] : [];
-    }
-
-    if (!in_array($cmd, $earlyshellcmds)) {
-        $earlyshellcmds[] = $cmd;
-        $config['system']['earlyshellcmd'] = $earlyshellcmds;
-        write_config("NetBird: Added early boot interface creation");
-    }
+netbird_early_start()
+{
+    /sbin/ifconfig wt0 > /dev/null 2>&1 || \
+        /sbin/ifconfig tun create name wt0 > /dev/null 2>&1
 }
 
-/**
- * Remove the NetBird earlyshellcmd during package uninstall.
- */
-function netbird_remove_earlyshellcmd()
-{
-    global $config;
+load_rc_config $name
+: ${netbird_early_enable:=YES}
+run_rc_command "$1"
+RCSCRIPT;
 
-    if (!isset($config['system']['earlyshellcmd'])) {
-        return;
-    }
-
-    $earlyshellcmds = $config['system']['earlyshellcmd'];
-    if (!is_array($earlyshellcmds)) {
-        $earlyshellcmds = [$earlyshellcmds];
-    }
-
-    $cmd = NETBIRD_IFACE_CMD;
-    $earlyshellcmds = array_values(array_filter($earlyshellcmds, function($c) use ($cmd) {
-        return $c !== $cmd;
-    }));
-
-    if (empty($earlyshellcmds)) {
-        unset($config['system']['earlyshellcmd']);
-    } else {
-        $config['system']['earlyshellcmd'] = $earlyshellcmds;
-    }
+    file_put_contents(NETBIRD_EARLY_RCSCRIPT, $script . "\n");
+    chmod(NETBIRD_EARLY_RCSCRIPT, 0755);
 }
+
+
 ?>
