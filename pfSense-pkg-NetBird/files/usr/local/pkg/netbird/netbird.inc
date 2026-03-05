@@ -26,10 +26,13 @@ require_once("util.inc");
 define('NETBIRD_BIN', '/usr/local/bin/netbird');
 define('NETBIRD_CONFIG', '/var/db/netbird/config.json');
 define('PKG_BIN', '/usr/sbin/pkg');
+define('NETBIRD_EARLY_RCSCRIPT', '/etc/rc.d/netbird_early.sh');
 
 
 function netbird_resync_config()
 {
+    netbird_install_early_rcscript();
+
     $json = file_get_contents(NETBIRD_CONFIG);
     $config = json_decode($json, true);
 
@@ -155,6 +158,7 @@ function netbird_write_rcfile() {
 function netbird_install()
 {
     netbird_write_rcfile();
+    netbird_install_early_rcscript();
 
     if (!netbird_is_running()){
         $cmd = implode(' ', [NETBIRD_BIN, 'service', 'start']);
@@ -171,10 +175,53 @@ function netbird_deinstall()
     }
 
     unlink_if_exists(NETBIRD_CONFIG);
+    unlink_if_exists(NETBIRD_EARLY_RCSCRIPT);
 
     if (isset($config['installedpackages']['netbird'])) {
         unset($config['installedpackages']['netbird']);
-        write_config("Removed netbird configuration");
     }
+
+    write_config("NetBird: Removed package configuration");
 }
+
+/**
+ * Write a FreeBSD rc.d script to /etc/rc.d/ that pre-creates the wt0
+ * tunnel interface. Using REQUIRE: FILESYSTEMS and BEFORE: netif places
+ * this in the FreeBSD NETWORKING phase, which runs before pfSense's
+ * LOCAL phase bootup (where the interface mismatch check occurs).
+ */
+function netbird_install_early_rcscript()
+{
+    $script = <<<'RCSCRIPT'
+#!/bin/sh
+#
+# PROVIDE: netbird_early
+# REQUIRE: FILESYSTEMS
+# BEFORE: netif
+# KEYWORD: nojail
+
+. /etc/rc.subr
+
+name="netbird_early"
+desc="Pre-create NetBird wt0 tunnel interface"
+rcvar="${name}_enable"
+start_cmd="${name}_start"
+stop_cmd=":"
+
+netbird_early_start()
+{
+    /sbin/ifconfig wt0 > /dev/null 2>&1 || \
+        /sbin/ifconfig tun create name wt0 > /dev/null 2>&1
+}
+
+load_rc_config $name
+: ${netbird_early_enable:=YES}
+run_rc_command "$1"
+RCSCRIPT;
+
+    file_put_contents(NETBIRD_EARLY_RCSCRIPT, $script . "\n");
+    chmod(NETBIRD_EARLY_RCSCRIPT, 0755);
+}
+
+
 ?>
