@@ -26,12 +26,10 @@ require_once("util.inc");
 define('NETBIRD_BIN', '/usr/local/bin/netbird');
 define('NETBIRD_CONFIG', '/var/db/netbird/config.json');
 define('PKG_BIN', '/usr/sbin/pkg');
-define('NETBIRD_EARLY_RCSCRIPT', '/etc/rc.d/netbird_early.sh');
-
 
 function netbird_resync_config()
 {
-    netbird_install_early_rcscript();
+    netbird_patch_interface_mismatch();
 
     $json = file_get_contents(NETBIRD_CONFIG);
     $config = json_decode($json, true);
@@ -158,7 +156,9 @@ function netbird_write_rcfile() {
 function netbird_install()
 {
     netbird_write_rcfile();
-    netbird_install_early_rcscript();
+    netbird_patch_interface_mismatch();
+    unlink_if_exists('/etc/rc.d/netbird_early.sh');
+    unlink_if_exists('/etc/rc.d/netbird_early');
 
     if (!netbird_is_running()){
         $cmd = implode(' ', [NETBIRD_BIN, 'service', 'start']);
@@ -175,7 +175,8 @@ function netbird_deinstall()
     }
 
     unlink_if_exists(NETBIRD_CONFIG);
-    unlink_if_exists(NETBIRD_EARLY_RCSCRIPT);
+    unlink_if_exists('/etc/rc.d/netbird_early.sh');
+    netbird_unpatch_interface_mismatch();
 
     if (isset($config['installedpackages']['netbird'])) {
         unset($config['installedpackages']['netbird']);
@@ -185,43 +186,55 @@ function netbird_deinstall()
 }
 
 /**
- * Write a FreeBSD rc.d script to /etc/rc.d/ that pre-creates the wt0
- * tunnel interface. Using REQUIRE: FILESYSTEMS and BEFORE: netif places
- * this in the FreeBSD NETWORKING phase, which runs before pfSense's
- * LOCAL phase bootup (where the interface mismatch check occurs).
+ * Add ^wt to pfSense's is_interface_mismatch() skip regex so that
+ * wt0 (NetBird's WireGuard tunnel) is treated like other virtual
+ * interfaces (^wg, ^ovpn, ^tun, etc.) and not removed on reboot.
+ *
+ * This is the same approach pfSense used upstream to add ^wg for
+ * WireGuard and ^ngeth for netgraph (commit c13bf6d).
  */
-function netbird_install_early_rcscript()
+function netbird_patch_interface_mismatch()
 {
-    $script = <<<'RCSCRIPT'
-#!/bin/sh
-#
-# PROVIDE: netbird_early
-# REQUIRE: FILESYSTEMS
-# BEFORE: netif
-# KEYWORD: nojail
-
-. /etc/rc.subr
-
-name="netbird_early"
-desc="Pre-create NetBird wt0 tunnel interface"
-rcvar="${name}_enable"
-start_cmd="${name}_start"
-stop_cmd=":"
-
-netbird_early_start()
-{
-    /sbin/ifconfig wt0 > /dev/null 2>&1 || \
-        /sbin/ifconfig tun create name wt0 > /dev/null 2>&1
+    $files = glob('/etc/inc/*.inc');
+    foreach ($files as $file) {
+        $content = file_get_contents($file);
+        if ($content === false) {
+            continue;
+        }
+        if (strpos($content, 'is_interface_mismatch') === false) {
+            continue;
+        }
+        if (strpos($content, '^wt') !== false) {
+            return;
+        }
+        $patched = str_replace('|^wg', '|^wg|^wt', $content);
+        if ($patched !== $content) {
+            file_put_contents($file, $patched);
+            log_error("NetBird: Patched interface mismatch check to skip wt interfaces in {$file}");
+        }
+    }
 }
 
-load_rc_config $name
-: ${netbird_early_enable:=YES}
-run_rc_command "$1"
-RCSCRIPT;
-
-    file_put_contents(NETBIRD_EARLY_RCSCRIPT, $script . "\n");
-    chmod(NETBIRD_EARLY_RCSCRIPT, 0755);
+/**
+ * Remove the ^wt entry from pfSense's mismatch skip regex on uninstall.
+ */
+function netbird_unpatch_interface_mismatch()
+{
+    $files = glob('/etc/inc/*.inc');
+    foreach ($files as $file) {
+        $content = file_get_contents($file);
+        if ($content === false) {
+            continue;
+        }
+        if (strpos($content, '|^wt') === false) {
+            continue;
+        }
+        $unpatched = str_replace('|^wt', '', $content);
+        if ($unpatched !== $content) {
+            file_put_contents($file, $unpatched);
+            log_error("NetBird: Removed wt interface mismatch patch from {$file}");
+        }
+    }
 }
-
 
 ?>
