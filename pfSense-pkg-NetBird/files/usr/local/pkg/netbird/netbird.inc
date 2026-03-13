@@ -157,8 +157,6 @@ function netbird_install()
 {
     netbird_write_rcfile();
     netbird_patch_interface_mismatch();
-    unlink_if_exists('/etc/rc.d/netbird_early.sh');
-    unlink_if_exists('/etc/rc.d/netbird_early');
 
     if (!netbird_is_running()){
         $cmd = implode(' ', [NETBIRD_BIN, 'service', 'start']);
@@ -175,7 +173,6 @@ function netbird_deinstall()
     }
 
     unlink_if_exists(NETBIRD_CONFIG);
-    unlink_if_exists('/etc/rc.d/netbird_early.sh');
     netbird_unpatch_interface_mismatch();
 
     if (isset($config['installedpackages']['netbird'])) {
@@ -187,11 +184,7 @@ function netbird_deinstall()
 
 /**
  * Add ^wt to pfSense's is_interface_mismatch() skip regex so that
- * wt0 (NetBird's WireGuard tunnel) is treated like other virtual
- * interfaces (^wg, ^ovpn, ^tun, etc.) and not removed on reboot.
- *
- * This is the same approach pfSense used upstream to add ^wg for
- * WireGuard and ^ngeth for netgraph (commit c13bf6d).
+ * wt0 is treated like other virtual interfaces and not removed on reboot.
  */
 function netbird_patch_interface_mismatch()
 {
