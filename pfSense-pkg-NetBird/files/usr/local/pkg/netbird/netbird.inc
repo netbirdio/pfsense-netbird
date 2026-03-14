@@ -27,9 +27,10 @@ define('NETBIRD_BIN', '/usr/local/bin/netbird');
 define('NETBIRD_CONFIG', '/var/db/netbird/config.json');
 define('PKG_BIN', '/usr/sbin/pkg');
 
-
 function netbird_resync_config()
 {
+    netbird_patch_interface_mismatch();
+
     $json = file_get_contents(NETBIRD_CONFIG);
     $config = json_decode($json, true);
 
@@ -155,6 +156,7 @@ function netbird_write_rcfile() {
 function netbird_install()
 {
     netbird_write_rcfile();
+    netbird_patch_interface_mismatch();
 
     if (!netbird_is_running()){
         $cmd = implode(' ', [NETBIRD_BIN, 'service', 'start']);
@@ -171,10 +173,61 @@ function netbird_deinstall()
     }
 
     unlink_if_exists(NETBIRD_CONFIG);
+    netbird_unpatch_interface_mismatch();
 
     if (isset($config['installedpackages']['netbird'])) {
         unset($config['installedpackages']['netbird']);
-        write_config("Removed netbird configuration");
+    }
+
+    write_config("NetBird: Removed package configuration");
+}
+
+/**
+ * Add ^wt to pfSense's is_interface_mismatch() skip regex so that
+ * wt0 is treated like other virtual interfaces and not removed on reboot.
+ */
+function netbird_patch_interface_mismatch()
+{
+    $files = glob('/etc/inc/*.inc');
+    foreach ($files as $file) {
+        $content = file_get_contents($file);
+        if ($content === false) {
+            continue;
+        }
+        if (strpos($content, 'is_interface_mismatch') === false) {
+            continue;
+        }
+        if (strpos($content, '^wt') !== false) {
+            return;
+        }
+        $patched = str_replace('|^wg', '|^wg|^wt', $content);
+        if ($patched !== $content) {
+            file_put_contents($file, $patched);
+            log_error("NetBird: Patched interface mismatch check to skip wt interfaces in {$file}");
+        }
     }
 }
+
+/**
+ * Remove the ^wt entry from pfSense's mismatch skip regex on uninstall.
+ */
+function netbird_unpatch_interface_mismatch()
+{
+    $files = glob('/etc/inc/*.inc');
+    foreach ($files as $file) {
+        $content = file_get_contents($file);
+        if ($content === false) {
+            continue;
+        }
+        if (strpos($content, '|^wt') === false) {
+            continue;
+        }
+        $unpatched = str_replace('|^wt', '', $content);
+        if ($unpatched !== $content) {
+            file_put_contents($file, $unpatched);
+            log_error("NetBird: Removed wt interface mismatch patch from {$file}");
+        }
+    }
+}
+
 ?>
