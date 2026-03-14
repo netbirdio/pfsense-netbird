@@ -148,8 +148,10 @@ function netbird_display_connection_info(): void
 function netbird_write_rcfile() {
     $rc['file'] = 'netbird.sh';
     $rc['start'] .= "/usr/local/bin/netbird service start\n\t";
+    $rc['start'] .= "sleep 2 && /etc/rc.filter_configure &\n\t";
     $rc['stop'] .= "/usr/local/bin/netbird service stop\n\t";
     $rc['restart'] .= "/usr/local/bin/netbird service restart\n\t";
+    $rc['restart'] .= "sleep 2 && /etc/rc.filter_configure &\n\t";
     write_rcfile($rc);
 }
 
