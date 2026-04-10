@@ -46,7 +46,7 @@ jobs:
           git push origin ${{ steps.increment_version.outputs.new_tag }}
 
       - name: Comment on PR
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             github.rest.issues.createComment({
