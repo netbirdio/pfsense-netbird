@@ -30,7 +30,7 @@ jobs:
 
       - name: Build
         id: build
-        uses: vmactions/freebsd-vm@v1.5.0
+        uses: vmactions/freebsd-vm@v1.5.2
         with:
           usesh: true
           copyback: true
