@@ -29,6 +29,7 @@
     <version>%%PKGVERSION%%</version>
     <title>VPN/NetBird</title>
     <include_file>/usr/local/pkg/netbird/netbird.inc</include_file>
+	<addedit_string>NetBird settings saved</addedit_string>
     <aftersaveredirect>/pkg_edit.php?xml=netbird.xml</aftersaveredirect>
     <menu>
         <name>NetBird</name>
