@@ -24,7 +24,7 @@ require_once("config.inc");
 require_once("util.inc");
 
 define('NETBIRD_BIN', '/usr/local/bin/netbird');
-define('NETBIRD_CONFIG', '/var/db/netbird/config.json');
+define('NETBIRD_CONFIG', '/cf/conf/netbird/config.json');
 define('PKG_BIN', '/usr/sbin/pkg');
 
 function netbird_resync_config()
