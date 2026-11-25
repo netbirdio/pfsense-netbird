@@ -12,7 +12,45 @@ netbird_env="IS_DAEMON=1"
 pidfile="/var/run/${name}.pid"
 command="/usr/sbin/daemon"
 daemon_args="-P ${pidfile} -r -t \"${name}: daemon\""
-command_args="${daemon_args} /usr/local/bin/netbird service run --config /var/db/netbird/config.json --log-level info --daemon-addr unix:///var/run/netbird.sock --log-file /var/log/netbird/client.log"
+command_args="${daemon_args} /usr/local/bin/netbird service run --config /cf/conf/netbird/config.json --log-level info --daemon-addr unix:///var/run/netbird.sock --log-file /var/log/netbird/client.log"
+
+start_precmd="netbird_prestart"
+
+netbird_prestart()
+{
+	echo "NetBird: pre-start checks..."
+	# ensure os-release exists before NetBird starts
+	VERSION="$(cat /etc/version)"
+	ARCH="$(uname -m)"
+	printf '%s\n' \
+		'NAME="Netgate pfSense"' \
+		"PRETTY_NAME=\"pfSense $VERSION\"" \
+		"VERSION=\"$VERSION\"" \
+		"VERSION_ID=\"$VERSION\"" \
+		"BUILD_ID=\"$ARCH\"" \
+		'ID=pfsense' \
+		'ID_LIKE=freebsd' \
+		> /var/run/os-release
+	# Ensure persistent config directory exists
+	mkdir -p /cf/conf/netbird
+	# wait for default route (max ~10s)
+	found=0
+	i=1
+	while [ "$i" -le 10 ]; do
+		if route -n get default >/dev/null 2>&1; then
+			found=1
+			break
+		fi
+		sleep 1
+		i=$((i + 1))
+	done
+	if [ "$found" -eq 1 ]; then
+		echo "NetBird: default route detected"
+	else
+		echo "NetBird: WARNING - no default route after 10s, continuing anyway"
+	fi
+	return 0
+}
 
 run_rc_command "$1"
 
